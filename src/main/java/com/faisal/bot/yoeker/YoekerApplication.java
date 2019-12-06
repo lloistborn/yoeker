@@ -1,4 +1,4 @@
-package com.faisal.yoeker.yoeker;
+package com.faisal.bot.yoeker;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
