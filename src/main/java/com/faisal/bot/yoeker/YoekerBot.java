@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import reactor.core.publisher.Mono;
 
 @Component
 public class YoekerBot extends TelegramLongPollingBot {
@@ -25,21 +25,21 @@ public class YoekerBot extends TelegramLongPollingBot {
   @Override
   public void onUpdateReceived(Update update) {
 
-    if (update.hasMessage() && update.getMessage().hasText()) {
+    Mono.just(update)
+        .filter(Update::hasMessage)
+        .filter(upd -> upd.getMessage().hasText())
+        .map(upd -> {
+          String messageText = upd.getMessage().getText();
+          long chatId = upd.getMessage().getChatId();
 
-      String messageText = update.getMessage().getText();
-      long chatId = update.getMessage().getChatId();
+          return Mono.fromCallable(() ->
+              execute(new SendMessage().setChatId(chatId).setText(messageText)))
+              .doOnNext(data -> LOGGER.info("Sent message \"{}\" to {}", messageText, chatId))
+              .doOnError(throwable -> LOGGER.error("Failed to send message \"{}\" to {} due to error: {}",
+                  messageText, chatId, throwable.getMessage()));
 
-      try {
-        execute(new SendMessage()
-            .setChatId(chatId)
-            .setText(messageText));
-        LOGGER.info("Sent message \"{}\" to {}", messageText, chatId);
-      } catch (TelegramApiException e) {
-        LOGGER.error("Failed to send message \"{}\" to {} due to error: {}", messageText, chatId,
-            e.getMessage());
-      }
-    }
+        })
+        .subscribe();
   }
 
   @Override
