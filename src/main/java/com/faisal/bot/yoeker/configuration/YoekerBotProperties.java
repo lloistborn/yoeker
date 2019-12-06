@@ -1,9 +1,9 @@
 package com.faisal.bot.yoeker.configuration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Component
+@Configuration
 @ConfigurationProperties("bot")
 public class YoekerBotProperties {
 
