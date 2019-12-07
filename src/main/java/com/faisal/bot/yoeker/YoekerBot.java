@@ -28,7 +28,7 @@ public class YoekerBot extends TelegramLongPollingBot {
     Mono.just(update)
         .filter(Update::hasMessage)
         .filter(upd -> upd.getMessage().hasText())
-        .map(upd -> {
+        .flatMap(upd -> {
           String messageText = upd.getMessage().getText();
           long chatId = upd.getMessage().getChatId();
 
@@ -37,7 +37,6 @@ public class YoekerBot extends TelegramLongPollingBot {
               .doOnNext(data -> LOGGER.info("Sent message \"{}\" to {}", messageText, chatId))
               .doOnError(throwable -> LOGGER.error("Failed to send message \"{}\" to {} due to error: {}",
                   messageText, chatId, throwable.getMessage()));
-
         })
         .subscribe();
   }
